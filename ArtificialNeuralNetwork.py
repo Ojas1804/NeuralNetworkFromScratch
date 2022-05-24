@@ -20,11 +20,9 @@ class ANN:
         for i in range(self.layers - 1):
             W = np.random.randn(self.node_per_layer[i], self.node_per_layer[i+1]) / np.sqrt(self.node_per_layer[i])
             weights[f"W{i}"] = W
-            # print(f"weights[W{i}] = ", weights[f"W{i}"].shape)
             
             B = np.random.randn(1, self.node_per_layer[i + 1])
             bias[f"B{i}"] = B
-            # print(f"bias[B{i}] = ", bias[f"B{i}"].shape)
 
         return weights, bias
 
@@ -96,7 +94,6 @@ class ANN:
         Z = []
 
         for i in range(self.layers - 1):
-            # print(x.shape, "     ", self.weights[f"W{i}"].shape, "      ", self.bias[f"B{i}"].shape)
             Z.append(x.dot(self.weights[f"W{i}"]) + self.bias[f"B{i}"])
             if(i == (len(self.node_per_layer) - 2)):
                 A.append(self.softmax(Z[-1]))
@@ -108,7 +105,7 @@ class ANN:
 
     # BACK PROPAGATION
     def back_prop(self, x, y_, A, Z):
-        y_ = self.one_hot_encode(y_).reshape(1, self.node_per_layer[-1])
+        y_ = self.one_hot_encode(y_).reshape(1, self.node_per_layer[-1])  # convert expected output to categorical data
         dB = []
         dW = []
 
@@ -154,7 +151,7 @@ class ANN:
                 A, Z = self.forward_pass(x)
                 prediction = np.argmax(A[-1])
                 predictions.append(prediction)
-
+                
                 dW, dB = self.back_prop(x, y[j], A, Z)
                 self.update_parameters(dW, dB)
             print("     Accuracy : ", self.calculate_accuracy(predictions, y), "%")
@@ -172,8 +169,23 @@ class ANN:
             predictions.append(prediction)
         print("        ACCURACY ON TEST DATASET:")
         print("Accuracy:", self.calculate_accuracy(predictions, y_test), "%")
+        
+        
+    def run_model(self, x, W, b): # run model on one input only after model has been trained
+        x = x.values.reshape(1, self.node_per_layer[0])
+        A = []
+        Z = []
+
+        for i in range(self.layers - 1):
+            Z.append(x.dot(W[i]) + b[i])
+            if(i == (len(self.node_per_layer) - 2)):
+                A.append(self.softmax(Z[-1]))
+            A.append(self.activation_function(Z[-1]))
+            x = A[-1]
+        return np.argmax(A[-1])
 
     
+    # save weights and biases if satisfied with training results
     def save_weight_and_bias(self, name):
         file_weights = open(name, "wb")
         pickle.dump(self.params, file_weights)
