@@ -2,7 +2,6 @@ import numpy as np
 import pickle
 
 class ANN:
-
     def __init__(self, node_per_layer, iters=20, alpha=0.05, hidden_layers=2,
                  activation_function="sigmoid"):
         self.iters = iters
@@ -84,6 +83,15 @@ class ANN:
             if(out[i] == y_[i]):
                 sum = sum + 1
         return sum/ y_.shape[0] * 100
+
+    
+    def flatten_input(self, input):
+        output = []
+        for i in range(input.shape[0]):
+            for j in range(input.shape[1]):
+                for k in range(input.shape[2]):
+                    output.append(input[i][j][k])
+        return np.array(output)
 
 
     # FORWARD PASS
